@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jan Lönnqvist — Citi In-House Creative Agency</title>
+<style>
+@font-face{font-family:'Diatype Variable';src:url('fonts/DiatypeVariable.woff2') format('woff2');font-weight:200 1000;font-display:swap}
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+    --bg:#0a0c10;
+    --surface:#10131a;
+    --citi:#056dae;
+    --citi-bright:#1a8fe0;
+    --citi-dim:rgba(5,109,174,.1);
+    --text:#e4e6ea;
+    --text-60:rgba(228,230,234,.6);
+    --text-25:rgba(228,230,234,.22);
+    --text-10:rgba(228,230,234,.07);
+    --text-05:rgba(228,230,234,.03);
+}
+html{scroll-behavior:smooth;overflow-x:hidden}
+html::-webkit-scrollbar{width:0}
+body{font-family:'Diatype Variable',-apple-system,Helvetica Neue,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;cursor:none;overflow-x:hidden}
+::selection{background:var(--citi);color:#fff}
+
+/* CURSOR */
+.cur-d{width:6px;height:6px;border-radius:50%;background:var(--citi-bright);position:fixed;transform:translate(-50%,-50%);z-index:10000;pointer-events:none;box-shadow:0 0 8px rgba(26,143,224,.25)}
+.cur-r{width:34px;height:34px;border-radius:50%;border:1px solid rgba(26,143,224,.12);position:fixed;transform:translate(-50%,-50%);z-index:9999;pointer-events:none;transition:all .4s cubic-bezier(.16,1,.3,1)}
+.cur-r.h{width:60px;height:60px;border-color:var(--citi-bright)}
+
+/* LOADER */
+#loader{position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;transition:opacity .5s ease .2s}
+#loader.done{opacity:0;pointer-events:none}
+#loader .l-text{font-size:.45rem;letter-spacing:.5em;text-transform:uppercase;color:var(--text-25);font-weight:600}
+#loader .l-bar{width:60px;height:1px;background:var(--text-10);overflow:hidden}
+#loader .l-fill{height:100%;width:0;background:var(--citi);animation:fill 1.3s ease .3s forwards}
+@keyframes fill{to{width:100%}}
+
+/* GRID OVERLAY — subtle data/tech feel */
+.grid-overlay{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:
+        linear-gradient(var(--text-05) 1px, transparent 1px),
+        linear-gradient(90deg, var(--text-05) 1px, transparent 1px);
+    background-size:60px 60px;
+    opacity:.4;
+}
+
+/* TOP ACCENT — Citi arc */
+.citi-arc{position:fixed;top:0;left:0;width:100%;height:3px;z-index:101;background:linear-gradient(90deg,transparent 10%,var(--citi) 50%,transparent 90%);opacity:.25}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:22px 48px;background:rgba(10,12,16,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--text-10);opacity:0;transition:opacity .8s ease .3s}
+nav.vis{opacity:1}
+nav .logo{font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--text-60)}
+nav .logo .accent{color:var(--citi-bright)}
+nav .links a{font-size:.42rem;font-weight:500;letter-spacing:.25em;text-transform:uppercase;color:var(--text-25);text-decoration:none;margin-left:28px;transition:color .3s;cursor:none}
+nav .links a:hover{color:var(--citi-bright)}
+
+/* HERO */
+.hero{height:100vh;display:flex;align-items:flex-end;padding:0 48px 10vh;position:relative;overflow:hidden}
+.hero-glow{position:absolute;top:20%;right:5%;width:50vw;height:50vw;background:radial-gradient(circle,rgba(5,109,174,.04) 0%,transparent 60%);pointer-events:none}
+/* Geometric trust pattern */
+.hero-geo{position:absolute;top:50%;right:8%;transform:translateY(-50%);width:280px;height:280px;border:1px solid var(--text-10);border-radius:50%;opacity:.15}
+.hero-geo::before{content:'';position:absolute;inset:30px;border:1px solid var(--text-10);border-radius:50%}
+.hero-geo::after{content:'';position:absolute;inset:60px;border:1px solid var(--text-10);border-radius:50%}
+.hero-content{max-width:900px;position:relative;z-index:2}
+.hero-tag{font-size:.4rem;font-weight:600;letter-spacing:.55em;text-transform:uppercase;color:var(--citi-bright);margin-bottom:20px;opacity:0;transform:translateY(16px);transition:all .8s ease .6s}
+.hero-tag.vis{opacity:1;transform:none}
+.hero-title{font-size:clamp(4rem,13vw,11rem);font-weight:900;line-height:.8;letter-spacing:-.05em;opacity:0;transform:translateY(40px);transition:all 1s cubic-bezier(.16,1,.3,1) .3s}
+.hero-title.vis{opacity:1;transform:none}
+.hero-title .thin{font-weight:200;color:var(--text-60)}
+.hero-title .accent{color:var(--citi-bright)}
+.hero-meta{display:flex;gap:32px;margin-top:28px;opacity:0;transform:translateY(16px);transition:all .8s ease 1s}
+.hero-meta.vis{opacity:1;transform:none}
+.hero-meta span{font-size:.45rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-25);font-weight:400}
+
+.scroll-cue{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);text-align:center}
+.scroll-cue span{font-size:.36rem;letter-spacing:.35em;text-transform:uppercase;color:var(--text-25);display:block}
+.scroll-cue .line{width:1px;height:28px;margin:8px auto 0;overflow:hidden}
+.scroll-cue .line-inner{width:100%;height:100%;background:var(--citi);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%{transform:translateY(-100%)}50%{transform:translateY(0)}100%{transform:translateY(100%)}}
+
+/* DATA STRIP — scrolling ticker like a trading floor */
+.data-strip{border-top:1px solid var(--text-10);border-bottom:1px solid var(--text-10);padding:10px 0;overflow:hidden;position:relative}
+.data-strip-inner{display:flex;gap:48px;white-space:nowrap;animation:ticker 30s linear infinite;width:max-content}
+.data-strip-inner span{font-size:.36rem;letter-spacing:.3em;text-transform:uppercase;color:var(--text-25);font-weight:500}
+.data-strip-inner .dot{color:var(--citi);margin:0 4px}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* MANIFESTO */
+.manifesto{padding:16vh 48px;max-width:880px;margin:0 auto}
+.manifesto-text{font-size:clamp(1.5rem,2.8vw,2.4rem);font-weight:300;line-height:1.4;letter-spacing:-.02em;color:var(--text-60)}
+.manifesto-text strong{font-weight:800;color:var(--text)}
+.manifesto-text em{font-style:normal;color:var(--citi-bright);font-weight:600}
+
+/* DIVIDER */
+.divider{padding:0 48px}
+.divider-line{height:1px;background:var(--text-10)}
+
+/* EXPERIENCE */
+.exp{padding:14vh 48px;position:relative;overflow:hidden}
+.exp::before{content:'EXPERIENCE';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(5rem,15vw,11rem);font-weight:900;letter-spacing:-.06em;color:var(--text-05);white-space:nowrap;pointer-events:none}
+.exp-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:56px;padding-bottom:16px;border-bottom:1px solid var(--text-10)}
+.exp-header h2{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;letter-spacing:-.04em}
+.exp-header h2 em{font-weight:200;font-style:normal;color:var(--citi-bright)}
+.exp-header .meta{font-size:.38rem;letter-spacing:.3em;text-transform:uppercase;color:var(--text-25);font-weight:500}
+
+.exp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--text-10)}
+.exp-card{padding:40px 32px;background:var(--bg);position:relative;transition:background .4s}
+.exp-card:hover{background:var(--surface)}
+.exp-card::after{content:'';position:absolute;top:0;left:0;width:0;height:2px;background:var(--citi);transition:width .7s cubic-bezier(.16,1,.3,1)}
+.exp-card:hover::after{width:100%}
+.exp-role{font-size:.36rem;letter-spacing:.4em;text-transform:uppercase;color:var(--citi-bright);font-weight:600;margin-bottom:8px}
+.exp-company{font-size:clamp(1rem,1.6vw,1.3rem);font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
+.exp-desc{font-size:clamp(.68rem,.8vw,.76rem);line-height:1.8;color:var(--text-60);font-weight:350}
+.exp-desc strong{color:var(--text);font-weight:600}
+.exp-stat{margin-top:14px;font-size:clamp(1.3rem,2vw,1.6rem);font-weight:800;color:var(--citi-bright);letter-spacing:-.03em}
+.exp-stat-label{font-size:.36rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-25);margin-top:2px}
+
+/* SKILLS */
+.skills-section{padding:6vh 48px;border-top:1px solid var(--text-10);border-bottom:1px solid var(--text-10)}
+.skills-grid{display:flex;flex-wrap:wrap;gap:0}
+.skills-grid span{font-size:clamp(.42rem,.52vw,.48rem);letter-spacing:.18em;text-transform:uppercase;color:var(--text-25);font-weight:500;padding:10px 22px;border-right:1px solid var(--text-10);transition:color .3s}
+.skills-grid span:last-child{border-right:none}
+.skills-grid span:hover{color:var(--citi-bright)}
+
+/* WHY CITI */
+.why{background:var(--surface);padding:16vh 48px;position:relative;overflow:hidden}
+.why::before{content:'CITI';position:absolute;bottom:-5vh;right:3vw;font-size:clamp(16rem,42vw,34rem);font-weight:900;line-height:.7;letter-spacing:-.05em;color:rgba(255,255,255,.012);pointer-events:none}
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;max-width:1200px}
+.why-tag{font-size:.38rem;letter-spacing:.6em;text-transform:uppercase;color:var(--citi-bright);font-weight:600;margin-bottom:20px;opacity:.6}
+.why-title{font-size:clamp(2rem,4vw,3.2rem);font-weight:900;letter-spacing:-.04em;line-height:.9;margin-bottom:24px}
+.why-title em{font-weight:200;font-style:normal;color:var(--text-60)}
+.why-text{font-size:clamp(.74rem,.88vw,.82rem);line-height:1.85;color:var(--text-60);font-weight:350}
+.why-text strong{color:var(--text);font-weight:600}
+.why-right{display:flex;flex-direction:column;justify-content:center;gap:24px}
+.why-item{border-left:2px solid var(--text-10);padding-left:20px;transition:border-color .4s}
+.why-item:hover{border-color:var(--citi-bright)}
+.why-item-title{font-size:clamp(.9rem,1.2vw,1.05rem);font-weight:700;margin-bottom:4px}
+.why-item-desc{font-size:clamp(.66rem,.78vw,.74rem);color:var(--text-60);line-height:1.7;font-weight:350}
+
+/* CTA */
+.cta{padding:18vh 48px;text-align:center}
+.cta-title{font-size:clamp(5rem,15vw,13rem);font-weight:900;line-height:.78;letter-spacing:-.06em}
+.cta-title .thin{font-weight:200;color:var(--text-60)}
+.cta-title .accent{color:var(--citi-bright)}
+.cta-info{margin-top:28px;font-size:.58rem;color:var(--text-25);line-height:2.2;letter-spacing:.05em}
+.cta-links{margin-top:20px;display:flex;gap:10px;justify-content:center}
+.cta-links a{font-size:.42rem;text-decoration:none;cursor:none;padding:13px 30px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;transition:all .4s}
+.cta-links a.primary{background:var(--citi);color:#fff;border:1px solid var(--citi)}
+.cta-links a.primary:hover{background:var(--citi-bright);box-shadow:0 0 30px rgba(5,109,174,.2)}
+.cta-links a.secondary{color:var(--text);border:1px solid var(--text-10)}
+.cta-links a.secondary:hover{border-color:var(--citi-bright);color:var(--citi-bright)}
+
+/* FOOTER */
+footer{padding:20px 48px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--text-10)}
+footer span{font-size:.36rem;letter-spacing:.25em;text-transform:uppercase;color:var(--text-25);font-weight:400}
+
+/* SCROLL REVEAL */
+.sr{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .8s cubic-bezier(.16,1,.3,1)}
+.sr.vis{opacity:1;transform:none}
+.sr-d1{transition-delay:.1s}
+.sr-d2{transition-delay:.2s}
+.sr-d3{transition-delay:.3s}
+.sr-d4{transition-delay:.4s}
+.sr-d5{transition-delay:.5s}
+
+@media(max-width:900px){
+    body{cursor:auto}
+    .cur-d,.cur-r{display:none}
+    nav{padding:16px 20px}
+    .hero{padding:0 24px 8vh}
+    .hero-geo{display:none}
+    .manifesto{padding:12vh 24px}
+    .exp{padding:10vh 24px}
+    .exp-grid{grid-template-columns:1fr}
+    .exp-header{flex-direction:column;align-items:flex-start;gap:6px}
+    .skills-section{padding:4vh 24px}
+    .skills-grid span{padding:8px 14px}
+    .why{padding:10vh 24px}
+    .why-grid{grid-template-columns:1fr;gap:40px}
+    .cta{padding:12vh 24px}
+    footer{padding:16px 24px}
+    .divider{padding:0 24px}
+}
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="l-text">In-House Creative Agency</div><div class="l-bar"><div class="l-fill"></div></div></div>
+
+<div class="cur-d" id="cd"></div>
+<div class="cur-r" id="cr"></div>
+<div class="citi-arc"></div>
+<div class="grid-overlay"></div>
+
+<nav id="nav">
+    <div class="logo">Jan Lönnqvist <span class="accent">&times;</span> Citi</div>
+    <div class="links">
+        <a href="#experience">Work</a>
+        <a href="#why">Why Citi</a>
+        <a href="#connect">Connect</a>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-geo"></div>
+    <div class="hero-content">
+        <div class="hero-tag" id="heroTag">Senior Conceptual Designer &middot; VP &middot; In-House Creative Agency</div>
+        <h1 class="hero-title" id="heroTitle">JAN<br><span class="thin">LÖNN</span><span class="accent">QVIST</span></h1>
+        <div class="hero-meta" id="heroMeta">
+            <span>Citi — London</span>
+            <span>12+ years</span>
+            <span>40+ countries</span>
+        </div>
+    </div>
+    <div class="scroll-cue"><span>Scroll</span><div class="line"><div class="line-inner"></div></div></div>
+</section>
+
+<div class="data-strip">
+    <div class="data-strip-inner">
+        <span>Conceptual Design</span><span class="dot">●</span>
+        <span>Integrated Campaigns</span><span class="dot">●</span>
+        <span>Brand Strategy</span><span class="dot">●</span>
+        <span>Financial Services</span><span class="dot">●</span>
+        <span>Stakeholder Management</span><span class="dot">●</span>
+        <span>Art Direction</span><span class="dot">●</span>
+        <span>Data Visualization</span><span class="dot">●</span>
+        <span>AI-Assisted Design</span><span class="dot">●</span>
+        <span>Cross-Channel</span><span class="dot">●</span>
+        <span>Global Markets</span><span class="dot">●</span>
+        <!-- duplicate for seamless loop -->
+        <span>Conceptual Design</span><span class="dot">●</span>
+        <span>Integrated Campaigns</span><span class="dot">●</span>
+        <span>Brand Strategy</span><span class="dot">●</span>
+        <span>Financial Services</span><span class="dot">●</span>
+        <span>Stakeholder Management</span><span class="dot">●</span>
+        <span>Art Direction</span><span class="dot">●</span>
+        <span>Data Visualization</span><span class="dot">●</span>
+        <span>AI-Assisted Design</span><span class="dot">●</span>
+        <span>Cross-Channel</span><span class="dot">●</span>
+        <span>Global Markets</span><span class="dot">●</span>
+    </div>
+</div>
+
+<section class="manifesto">
+    <p class="manifesto-text sr">I design <strong>conceptual campaigns for global brands</strong> — integrated work across <em>digital, print, and experiential</em>. Strategic thinking, stakeholder fluency, and the creative rigour a regulated industry demands.</p>
+</section>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<section class="exp" id="experience">
+    <div class="exp-header sr">
+        <h2>Where I've <em>delivered</em></h2>
+        <div class="meta">6 brand-side roles &middot; 12+ years</div>
+    </div>
+    <div class="exp-grid">
+        <div class="exp-card sr sr-d1">
+            <div class="exp-role">Global Campaign Design</div>
+            <div class="exp-company">GLS Group</div>
+            <p class="exp-desc">Integrated campaign design across <strong>40+ countries</strong> — digital, print, CRM, OOH. Brand guidelines, design systems, and creative direction at enterprise scale. The <strong>stakeholder complexity and compliance rigour</strong> Citi's in-house agency operates with.</p>
+            <div class="exp-stat">40+</div>
+            <div class="exp-stat-label">Countries</div>
+        </div>
+        <div class="exp-card sr sr-d2">
+            <div class="exp-role">360 Advertising</div>
+            <div class="exp-company">DHL</div>
+            <p class="exp-desc">Conceptual campaigns across <strong>12+ markets</strong>: banners, social, emailers, print collateral. <strong>20% of targeted leads in month one.</strong> Data-informed design that connects brand storytelling to measurable business outcomes.</p>
+            <div class="exp-stat">20%</div>
+            <div class="exp-stat-label">Leads month 1</div>
+        </div>
+        <div class="exp-card sr sr-d3">
+            <div class="exp-role">Brand & Packaging</div>
+            <div class="exp-company">Rituals</div>
+            <p class="exp-desc"><strong>Hammam campaign — highest sales in product history.</strong> Conceptual design across digital, CRM, packaging, and in-store POS. Translating a single creative idea into a <strong>fully integrated, cross-channel experience</strong>.</p>
+            <div class="exp-stat">#1</div>
+            <div class="exp-stat-label">Sales record</div>
+        </div>
+        <div class="exp-card sr sr-d1">
+            <div class="exp-role">Team Lead & Production</div>
+            <div class="exp-company">HelloFresh</div>
+            <p class="exp-desc"><strong>Led a team of three</strong> for campaign production across BENELUX and France. High-volume concepting and production at pace — presenting to stakeholders, managing timelines, and delivering across channels.</p>
+            <div class="exp-stat">3</div>
+            <div class="exp-stat-label">Direct reports</div>
+        </div>
+        <div class="exp-card sr sr-d2">
+            <div class="exp-role">Art Direction</div>
+            <div class="exp-company">Filling Pieces</div>
+            <p class="exp-desc">Lookbook design and art direction for a <strong>premium brand</strong>. Elevated conceptual thinking translated into polished execution — the kind of <strong>craft and quality</strong> Citi's brand demands.</p>
+            <div class="exp-stat">AMS</div>
+            <div class="exp-stat-label">Premium fashion</div>
+        </div>
+        <div class="exp-card sr sr-d3">
+            <div class="exp-role">AI & Innovation</div>
+            <div class="exp-company">GLS / Freelance</div>
+            <p class="exp-desc"><strong>AI in creative processes</strong> — Firefly, Midjourney, AI-assisted concepting. Building workflows that accelerate ideation while maintaining brand integrity. <strong>Exploring how AI elevates</strong> rather than replaces creative thinking.</p>
+            <div class="exp-stat">AI</div>
+            <div class="exp-stat-label">Native workflows</div>
+        </div>
+    </div>
+</section>
+
+<div class="skills-section">
+    <div class="skills-grid">
+        <span>Adobe Creative Cloud</span>
+        <span>Figma</span>
+        <span>Photoshop</span>
+        <span>Illustrator</span>
+        <span>InDesign</span>
+        <span>After Effects</span>
+        <span>Data Visualization</span>
+        <span>Presentation Design</span>
+        <span>Brand Guidelines</span>
+        <span>Conceptual Thinking</span>
+        <span>Stakeholder Management</span>
+        <span>AI-Assisted Design</span>
+        <span>Cross-Channel Campaigns</span>
+        <span>Motion Design</span>
+    </div>
+</div>
+
+<section class="why" id="why">
+    <div class="why-grid">
+        <div>
+            <div class="why-tag sr">Why Citi</div>
+            <h2 class="why-title sr sr-d1">Trust<br><em>by design</em></h2>
+            <p class="why-text sr sr-d2">Citi's in-house agency sits at the intersection of <strong>creative ambition and institutional trust</strong>. That's the challenge I want — designing campaigns that are conceptually bold yet appropriate for one of the world's most recognised financial institutions.</p>
+            <p class="why-text sr sr-d3" style="margin-top:14px">I've spent 12 years designing for <strong>regulated, high-stakes environments</strong> — global logistics, international markets, enterprise stakeholders. I understand that great creative work in these contexts requires <strong>rigour, clarity, and the confidence to present ideas at every level</strong>.</p>
+        </div>
+        <div class="why-right sr sr-d2">
+            <div class="why-item">
+                <div class="why-item-title">Enterprise scale</div>
+                <div class="why-item-desc">40+ countries, 12+ markets, senior stakeholders. I've navigated complex approvals and compliance while protecting creative quality.</div>
+            </div>
+            <div class="why-item">
+                <div class="why-item-title">Conceptual depth</div>
+                <div class="why-item-desc">I don't start with templates — I start with ideas. Campaign concepts that connect across channels, from digital to print to experiential.</div>
+            </div>
+            <div class="why-item">
+                <div class="why-item-title">Stakeholder fluency</div>
+                <div class="why-item-desc">Presenting to C-suite, managing feedback loops, building consensus. I've led creative reviews across regions and seniority levels.</div>
+            </div>
+            <div class="why-item">
+                <div class="why-item-title">London-ready</div>
+                <div class="why-item-desc">Based in Amsterdam, ready to relocate. English fluent, written and spoken. EU passport holder.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta" id="connect">
+    <h2 class="cta-title sr">LET'S<br><span class="thin">CONNECT</span></h2>
+    <p class="cta-info sr sr-d1">jan.lonnqvist@windowslive.com &middot; +31 619 584 748<br>Amsterdam &rarr; London</p>
+    <div class="cta-links sr sr-d2">
+        <a href="mailto:jan.lonnqvist@windowslive.com" class="primary">Email me</a>
+        <a href="tel:+31619584748" class="secondary">Call</a>
+    </div>
+</section>
+
+<footer>
+    <span>&copy; Jan Lönnqvist 2026</span>
+    <span>Amsterdam</span>
+</footer>
+
+<script>
+// Loader
+setTimeout(() => {
+    document.getElementById('loader').classList.add('done');
+    document.getElementById('nav').classList.add('vis');
+}, 1700);
+setTimeout(() => {
+    document.getElementById('heroTag').classList.add('vis');
+    document.getElementById('heroTitle').classList.add('vis');
+    document.getElementById('heroMeta').classList.add('vis');
+}, 2100);
+
+// Scroll reveal
+const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); obs.unobserve(e.target); }});
+}, { threshold: .12 });
+document.querySelectorAll('.sr').forEach(el => obs.observe(el));
+
+// Cursor
+const cd = document.getElementById('cd'), cr = document.getElementById('cr');
+let cx = -100, cy = -100, rx = -100, ry = -100;
+const M = /Mobi|Android/i.test(navigator.userAgent) || window.innerWidth < 900;
+if (!M) {
+    document.addEventListener('mousemove', e => { cx = e.clientX; cy = e.clientY; });
+    document.querySelectorAll('a, .skills-grid span, .why-item').forEach(el => {
+        el.addEventListener('mouseenter', () => cr.classList.add('h'));
+        el.addEventListener('mouseleave', () => cr.classList.remove('h'));
+    });
+    (function raf() {
+        requestAnimationFrame(raf);
+        cd.style.left = cx + 'px'; cd.style.top = cy + 'px';
+        rx += (cx - rx) * .08; ry += (cy - ry) * .08;
+        cr.style.left = rx + 'px'; cr.style.top = ry + 'px';
+    })();
+}
+
+// Protection
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+    if (e.key === 'F12') e.preventDefault();
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)) e.preventDefault();
+    if ((e.ctrlKey || e.metaKey) && ['u','U','s','S'].includes(e.key)) e.preventDefault();
+});
+document.addEventListener('dragstart', e => e.preventDefault());
+document.addEventListener('selectstart', e => { if (e.target.closest && (e.target.closest('a') || e.target.closest('input'))) return; e.preventDefault(); });
+</script>
+</body>
+</html>
